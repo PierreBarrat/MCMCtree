@@ -39,13 +39,19 @@ void sample_from_distribution_gibbs(double** J, double* h, double* pg, int* seed
 {
 	int i, t, alpha, rand_pos;
 	double Z,tow;
+
+	int beta = 0;
 	
+	// printf("Hello1\n");
+	// fflush(stdout);
 	for (i = 0; i < L; ++i)
 	{
 		conf[i] = seed[i];
 	}
+	// printf("Hello2\n");
 	for (t = 0; t < n_it; ++t)	
 	{
+		// printf("Hello3\n");
 		rand_pos = rand()%L;
 		// Conditionnal probablity for rand_pos
 		Z = 0;
@@ -63,18 +69,29 @@ void sample_from_distribution_gibbs(double** J, double* h, double* pg, int* seed
 					pg[alpha] = pg[alpha] - J[rand_pos*q+alpha][i*q+conf[i]] + J[rand_pos*q+conf[rand_pos]][i*q+conf[i]];
 				}
 			}
+			pg[alpha] = exp(-pg[alpha]);
 			Z += pg[alpha];
 		}
+		// printf("Hello4\n");
 		// Sampling from pg 
 		alpha = 0;
-		tow = pg[alpha];
-		while(tow < (double)rand()/(double)RAND_MAX*Z)
+		tow = pg[alpha]/Z;
+		while(tow < (double)rand()/(double)RAND_MAX)
 		{	
 			alpha++;
-			tow += pg[alpha];
+			tow += pg[alpha]/Z;
 		}
+		// printf("Hello5\n");
 		if(alpha >= q)
-			{printf("MCMC_sampling.c - sample_from_distribution_gibbs: while sampling from pg, %d > %d.\n",alpha,q);}
+		{
+			printf("MCMC_sampling.c - sample_from_distribution_gibbs: while sampling from pg, %d > %d.\n",alpha+1,q);
+			for (beta = 0; beta < q; ++beta)
+			{
+				printf("pg[%d] = %f -- tow = %f -- Z = %f\n", beta, pg[beta], tow, Z);
+				fflush(stdout);
+			}
+			alpha = q-1;
+		}
 		// Move is always accepted
 		conf[rand_pos] = alpha;
 	}
@@ -117,7 +134,7 @@ void sample_tree_MCMC(double** J, double* h, node* tree, int size_tree, int* see
 			// sample_from_distribution(J, h, tree[i].conf, tree[tree[i].children[j]].conf, tau, L, q);
 			sample_from_distribution_gibbs(J, h, pgibbs, tree[i].conf, tree[tree[i].children[j]].conf, tau, L, q);
 			printf("s=%d/%d\r",it_count++,size_tree);
-			// fflush(stdout);
+			fflush(stdout);
 			// usleep(20000);
 		}
 

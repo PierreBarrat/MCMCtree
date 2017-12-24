@@ -12,6 +12,11 @@ Samples from distribution (J,h) for 'n_it' steps, with 'seed' as a starting poin
 void sample_from_distribution(double** J, double* h, int* seed, int* conf, int n_it, int L, int q);
 
 /*
+Samples from distribution (J,h) for 'n_it' steps, with 'seed' as a starting point and 'conf' as the end point, using Gibbs sampler.
+*/
+void sample_from_distribution_gibbs(double** J, double* h, double* pg, int* seed, int* conf, int n_it, int L, int q);
+
+/*
 Samples one configuration for each node in tree. Number of MCMC iterations between two nodes is 'tau'.
 size_tree is the number of nodes in the tree
 */
